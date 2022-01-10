@@ -42,7 +42,7 @@ export const GET_EMPLOYEE_BY_EMAIL = gql`
 
 //Interfaces
 export interface EmployeesResponse {
-  employees: [Employee];
+  employees: Employee[];
 }
 
 export interface EmployeeResponse {
@@ -50,7 +50,7 @@ export interface EmployeeResponse {
 }
 
 export interface EmployeeByEmailResponse {
-  employeeByEmail: [Employee];
+  employeeByEmail: Employee[];
 }
 
 export interface EmployeeByIdInput {
@@ -67,7 +67,7 @@ export const useGetAllEmployees = () => {
 };
 
 export const useGetEmployeeById = (employeeById: String) => {
-  return useLazyQuery<EmployeeResponse, EmployeeByIdInput>(GET_EMPLOYEE_BY_ID, {
+  return useQuery<EmployeeResponse, EmployeeByIdInput>(GET_EMPLOYEE_BY_ID, {
     variables: { employeeById },
   });
 };
