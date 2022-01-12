@@ -1,8 +1,14 @@
-import { useRef } from "react";
-import { Employee } from "../../types/types";
+import { useContext, useRef } from "react";
+import { Employee as IEmployee } from "../../types/types";
+import { Employee } from "../../model/objectClasses";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { Button, MenuItem } from "@mui/material";
+import DBContext from "../../store/db/DBContext";
+import {
+  useAddEmployee,
+  useUpdateEmployee,
+} from "../../graphQL/employeeMutations";
 
 const roleOptions = [
   {
@@ -20,17 +26,50 @@ const roleOptions = [
 ];
 
 interface EmployeeEditModalContentInterface {
-  employee: Employee;
+  employee: IEmployee;
+  close: () => void;
 }
 
 const EmployeeModalContent = (props: EmployeeEditModalContentInterface) => {
-  const empName = useRef<HTMLInputElement | null>(null)
-  const empEmail = useRef<HTMLInputElement | null>(null)
-  const empRole = useRef<HTMLInputElement | null>(null)
+  const dbContext = useContext(DBContext);
 
+  const { addEmployee } = useAddEmployee();
+  const { updateEmployee } = useUpdateEmployee();
 
-  const onRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(event);
+  const empName = useRef<HTMLInputElement | null>(null);
+  const empEmail = useRef<HTMLInputElement | null>(null);
+  const empRole = useRef<HTMLInputElement | null>(null);
+
+  const onSaveAdd = () => {
+    const newEmp: Employee = new Employee(
+      dbContext.employees.length,
+      empName.current?.value,
+      empEmail.current?.value,
+      empRole.current?.value
+    );
+
+    addEmployee(newEmp)
+      .then(() => {
+        dbContext.addEmployee(newEmp);
+        props.close();
+      })
+      .catch((err) => console.log(err.message));
+  };
+
+  const onSaveUpdate = () => {
+    const updatedEmp: Employee = new Employee(
+      props.employee.id,
+      empName.current?.value,
+      empEmail.current?.value,
+      empRole.current?.value
+    );
+
+    updateEmployee(updatedEmp)
+      .then(() => {
+        dbContext.updateEmployee(updatedEmp);
+        props.close();
+      })
+      .catch((err) => console.log(err.message));
   };
 
   return (
@@ -50,7 +89,7 @@ const EmployeeModalContent = (props: EmployeeEditModalContentInterface) => {
           label="Name"
           type="text"
           size="small"
-          ref={empName}
+          inputRef={empName}
           defaultValue={props.employee?.name}
         />
 
@@ -60,7 +99,7 @@ const EmployeeModalContent = (props: EmployeeEditModalContentInterface) => {
           label="email"
           type="email"
           size="small"
-          ref={empEmail}
+          inputRef={empEmail}
           defaultValue={props.employee?.email}
         />
 
@@ -68,9 +107,8 @@ const EmployeeModalContent = (props: EmployeeEditModalContentInterface) => {
           id="role"
           select
           label="Role"
-          value={props.employee?.role}
-          ref={empRole}
-          onChange={onRoleChange}
+          defaultValue={props.employee?.role}
+          inputRef={empRole}
           size="small"
         >
           {roleOptions.map((option) => (
@@ -82,7 +120,11 @@ const EmployeeModalContent = (props: EmployeeEditModalContentInterface) => {
       </Box>
 
       <Box textAlign="center">
-        <Button variant="contained" sx={{ m: 1 }}>
+        <Button
+          variant="contained"
+          sx={{ m: 1 }}
+          onClick={props.employee.id === -1 ? onSaveAdd : onSaveUpdate}
+        >
           Save
         </Button>
       </Box>

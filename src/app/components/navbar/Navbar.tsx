@@ -15,7 +15,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 import { Link, useNavigate } from "react-router-dom";
 import React, { useContext, useEffect, useState } from "react";
-import AuthContext from "../../context/auth-context";
+import AuthContext from "../../store/auth/AuthContext";
 import classes from "./Navbar.module.css";
 
 interface PageInterface {
@@ -28,8 +28,8 @@ const LOGO = "PROJECT MANAGEMENT";
 
 const ADMIN_PAGES: PageInterface[] = [
   { name: "Dashboard", link: "/dashboard" },
-  { name: "New Employee", link: "./new-employee" },
-  { name: "New Project", link: "/new-project" },
+  //{ name: "New Employee", link: "./new-employee" },
+  //{ name: "New Project", link: "/new-project" },
 ];
 
 const MANAGER_PAGES: PageInterface[] = [
@@ -46,9 +46,6 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    
-    console.log('role = ' + authContext.userInfo?.role);
-
     switch (authContext.userInfo?.role) {
       case "ADMIN": {
         setPages(ADMIN_PAGES);

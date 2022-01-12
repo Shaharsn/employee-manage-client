@@ -1,6 +1,6 @@
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import { Employee } from "../types/types";
-
+ 
 // GraphQL Queries
 export const GET_ALL_EMPLOYEES = gql`
   query Employees {
@@ -67,7 +67,7 @@ export const useGetAllEmployees = () => {
 };
 
 export const useGetEmployeeById = (employeeById: String) => {
-  return useQuery<EmployeeResponse, EmployeeByIdInput>(GET_EMPLOYEE_BY_ID, {
+  return useQuery<EmployeeByEmailResponse, EmployeeByIdInput>(GET_EMPLOYEE_BY_ID, {
     variables: { employeeById },
   });
 };

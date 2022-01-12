@@ -8,31 +8,38 @@ import {
 import { useGetAllProjects } from "../../graphQL/project";
 import ProjectDataTable from "./ProjectDataTable";
 import AddIcon from "@mui/icons-material/AddBox";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import useModal from "../../hooks/useModal";
 import ProjectEditModalContent from "./ProjectEditModalContent";
 import ModalPortal from "../UI/ModalPortal";
 import { Project } from "../../types/types";
 import DeleteModal from "../UI/DeleteModal";
+import DBContext from "../../store/db/DBContext";
 
-const ProjectList = () => {  
+const ProjectList = () => {
+  const dbContext = useContext(DBContext);
+
   const { isShowing: showEditModal, toggle: toggleEditModal } = useModal();
   const { isShowing: showDeleteModal, toggle: toggleDeleteModal } = useModal();
 
   const { loading, error, data } = useGetAllProjects();
-  const projects = data && data.projects ? data.projects : [];
 
-  const [selectedProject, setSelectedProject] = useState<
-    Project | undefined
-  >();
+  useEffect(() => {
+    let projects =
+      data && data.projects && data.projects.length > 0 ? data.projects : [];
+
+    dbContext.storeProjectList(projects);
+  }, [data]);
+
+  const [selectedProject, setSelectedProject] = useState<Project | undefined>();
 
   const onEdit = (projectId: number) => {
-    setSelectedProject(projects.find((emp) => emp.id === projectId));
+    setSelectedProject(dbContext.projects.find((emp) => emp.id === projectId));
     toggleEditModal();
   };
 
   const onDelete = (projectId: number) => {
-    setSelectedProject(projects.find((emp) => emp.id === projectId));
+    setSelectedProject(dbContext.projects.find((emp) => emp.id === projectId));
     toggleDeleteModal();
   };
 
@@ -57,9 +64,11 @@ const ProjectList = () => {
         <AddIcon />
       </CardHeader>
       <CardContent>
-        <ProjectDataTable projects={projects} 
+        <ProjectDataTable
+          projects={dbContext.projects}
           editProject={onEdit}
-          deleteProject={onDelete} />
+          deleteProject={onDelete}
+        />
       </CardContent>
 
       <ModalPortal
@@ -75,7 +84,7 @@ const ProjectList = () => {
         showModal={showDeleteModal}
         closeModal={toggleDeleteModal}
       >
-        <DeleteModal type="Project" name={selectedProject?.name} />
+        {/*<DeleteModal type="Project" name={selectedProject?.name} id={selectedProject?.id} />*/}
       </ModalPortal>
     </Card>
   );

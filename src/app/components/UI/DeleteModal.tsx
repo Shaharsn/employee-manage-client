@@ -3,13 +3,21 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
 interface DeleteModalInterface {
-    type: string;
-    name: string | undefined;
-  }
+  type: string;
+  name: string | undefined;
+  id: number;
+  confirmMethod: (id: number) => void;
+  closeModal: () => void;
+}
 
 const DeleteModal = (props: DeleteModalInterface) => {
-    return (
-        <>
+  const onConfirm = () => {
+    props.confirmMethod(props.id);
+    props.closeModal();
+  };
+
+  return (
+    <>
       <Box
         component="form"
         sx={{
@@ -23,11 +31,11 @@ const DeleteModal = (props: DeleteModalInterface) => {
       </Box>
 
       <Box textAlign="center">
-        <Button variant="contained" sx={{ m: 1 }}>
+        <Button variant="contained" sx={{ m: 1 }} onClick={onConfirm}>
           Confirm
         </Button>
       </Box>
     </>
-    );
-}
+  );
+};
 export default DeleteModal;

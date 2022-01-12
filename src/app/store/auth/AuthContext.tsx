@@ -1,19 +1,18 @@
-import React, { useState } from "react";
-import { UserInfo } from "../model/userInfo";
-import { Employee } from "../types/types";
+import React, { ReactNode, useState } from "react";
+import { UserInfo } from "../../model/userInfo";
 
 // CONTEXT
-interface AuthContextObj {
+interface AuthContextInterface {
   isLoggedIn: boolean;
   userInfo: UserInfo | undefined;
   login: (userInfo: UserInfo) => void;
   logout: () => void;
 }
 
-const AuthContext = React.createContext<AuthContextObj>({
+const AuthContext = React.createContext<AuthContextInterface>({
   isLoggedIn: false,
   userInfo: undefined,
-  login: (userInfo: UserInfo) => {},
+  login: () => {},
   logout: () => {},
 });
 
@@ -21,8 +20,6 @@ const AuthContext = React.createContext<AuthContextObj>({
 
 // Check if the user still logged in
 const getLoggedInUserInfo = () => {
-  console.log("in getLoggedInUserInfo");
-
   const storedExpirationTime = localStorage.getItem("expirationTime");
   const loggedUserName = localStorage.getItem("userName") || "";
   const loggedUserRole = localStorage.getItem("userRole") || "";
@@ -43,7 +40,11 @@ const getLoggedInUserInfo = () => {
   };
 };
 
-export const AuthContextProvider: React.FC = (props) => {
+interface AuthContextProviderInterface {
+  children: ReactNode;
+}
+
+export const AuthContextProvider = (props: AuthContextProviderInterface) => {
   const { logged, loggedUserInfo } = getLoggedInUserInfo();
 
   const [isLoggedIn, setIsLoggedIn] = useState(logged);
@@ -71,7 +72,7 @@ export const AuthContextProvider: React.FC = (props) => {
     localStorage.clear();
   };
 
-  const contextValue: AuthContextObj = {
+  const contextValue: AuthContextInterface = {
     isLoggedIn: isLoggedIn,
     userInfo: userInfo,
     login: loginHandler,

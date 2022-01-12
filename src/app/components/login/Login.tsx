@@ -1,7 +1,7 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import AuthContext from "../../context/auth-context";
-import { useGetEmployeeByEmail } from "../../graphQL/employee";
+import AuthContext from "../../store/auth/AuthContext";
+import { useGetEmployeeByEmail } from "../../graphQL/employeeQueries";
 import { UserInfo } from "../../model/userInfo";
 import {
   Avatar,
@@ -26,6 +26,16 @@ const Login = () => {
   // Get User from the Employee list (GraphQL)
   const [getEmployee, { loading, error, data }] = useGetEmployeeByEmail("");
 
+  // Store the user in the Auth Context and navigate to the Dashboard page
+  useEffect(() => {
+    if (data && data.employeeByEmail != null && data.employeeByEmail.length > 0) {
+      const employee = data.employeeByEmail[0];
+
+      authContext.login(new UserInfo(employee.name, employee.role));
+      navigate("/dashboard", { replace: true });
+    }
+  },[authContext, data, navigate]);
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -47,17 +57,6 @@ const Login = () => {
 
   if (error) {
     return <p>{error}</p>;
-  }
-
-  if (data) {
-    console.log(data);
-
-    if (data.employeeByEmail != null && data.employeeByEmail.length > 0) {
-      const employee = data.employeeByEmail[0];
-
-      authContext.login(new UserInfo(employee.name, employee.role));
-      navigate("/dashboard", { replace: true });
-    }
   }
 
   return authContext.isLoggedIn ? (

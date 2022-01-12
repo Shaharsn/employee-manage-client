@@ -7,8 +7,8 @@ export class Employee implements IEmployee {
   role: string;
   projects: IProject[];
 
-  constructor(name?: string, email?: string, role?: string) {
-    this.id = -1;
+  constructor(id?: number, name?: string, email?: string, role?: string) {
+    this.id = id ? id : -1;
     this.name = name ? name : "";
     this.email = email ? email : "";
     this.role = role ? role : "";
