@@ -22,25 +22,27 @@ interface ModalInterface {
   closeModal: () => void;
 }
 
-const ModalPortal = (props: ModalInterface) =>
-  props.showModal
+const ModalPortal = (props: ModalInterface) => {
+  const { header, children, showModal, closeModal } = props;
+
+  return props.showModal
     ? ReactDOM.createPortal(
         <Modal
           aria-labelledby="transition-modal-title"
           aria-describedby="transition-modal-description"
-          open={props.showModal}
-          onClose={props.closeModal}
+          open={showModal}
+          onClose={closeModal}
           closeAfterTransition
           BackdropComponent={Backdrop}
           BackdropProps={{
             timeout: 500,
           }}
         >
-          <Fade in={props.showModal}>
+          <Fade in={showModal}>
             <Box sx={boxStyle}>
               <IconButton
                 aria-label="edit"
-                onClick={props.closeModal}
+                onClick={closeModal}
                 sx={{ float: "right", padding: ["3px"] }}
               >
                 <CloseIcon />
@@ -51,15 +53,16 @@ const ModalPortal = (props: ModalInterface) =>
                 variant="h6"
                 component="h2"
               >
-                {props.header}
+                {header}
               </Typography>
 
-              {props.children}
+              {children}
             </Box>
           </Fade>
         </Modal>,
         document.body
       )
     : null;
+};
 
 export default ModalPortal;

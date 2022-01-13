@@ -61,7 +61,7 @@ export interface EmployeeByEmailInput {
   email: String;
 }
 
-// GraphQL Queries Methods
+// GraphQL Queries Custom Hooks
 export const useGetAllEmployees = () => {
   return useQuery<EmployeesResponse>(GET_ALL_EMPLOYEES);
 };

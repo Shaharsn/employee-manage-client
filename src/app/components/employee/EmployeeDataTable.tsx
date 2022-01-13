@@ -37,11 +37,13 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 interface EmployeeDataTableInterface {
   employees: Employee[];
-  editEmployee: (employeeId: number) => void;
-  deleteEmployee: (employeeId: number) => void;
+  editEmployee: (employee: Employee) => void;
+  deleteEmployee: (employee: Employee) => void;
 }
 
 const EmployeeDataTable = (props: EmployeeDataTableInterface) => {
+  const { employees, editEmployee, deleteEmployee } = props;
+
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 500 }} aria-label="customized table">
@@ -59,7 +61,7 @@ const EmployeeDataTable = (props: EmployeeDataTableInterface) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {props.employees.map((employee) => (
+          {employees.map((employee) => (
             <StyledTableRow
               key={employee.id}
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -81,13 +83,13 @@ const EmployeeDataTable = (props: EmployeeDataTableInterface) => {
               <StyledTableCell component="th" scope="row" align="center">
                 <IconButton
                   aria-label="edit"
-                  onClick={() => props.editEmployee(employee.id)}
+                  onClick={() => editEmployee(employee)}
                 >
                   <EditIcon />
                 </IconButton>
                 <IconButton
                   aria-label="delete"
-                  onClick={() => props.deleteEmployee(employee.id)}
+                  onClick={() => deleteEmployee(employee)}
                 >
                   <DeleteIcon />
                 </IconButton>

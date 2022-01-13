@@ -2,7 +2,7 @@ import { useContext, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import AuthContext from "../../store/auth/AuthContext";
 import { useGetEmployeeByEmail } from "../../graphQL/employeeQueries";
-import { UserInfo } from "../../model/userInfo";
+import { UserInfo } from "../../types/types";
 import {
   Avatar,
   Box,
@@ -28,13 +28,20 @@ const Login = () => {
 
   // Store the user in the Auth Context and navigate to the Dashboard page
   useEffect(() => {
-    if (data && data.employeeByEmail != null && data.employeeByEmail.length > 0) {
+    if (
+      data &&
+      data.employeeByEmail != null &&
+      data.employeeByEmail.length > 0
+    ) {
       const employee = data.employeeByEmail[0];
 
-      authContext.login(new UserInfo(employee.name, employee.role));
+      authContext.login({
+        userName: employee.name || "",
+        role: employee.role || "",
+      });
       navigate("/dashboard", { replace: true });
     }
-  },[authContext, data, navigate]);
+  }, [authContext, data, navigate]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

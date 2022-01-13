@@ -8,72 +8,72 @@ import {
 import { useGetAllEmployees } from "../../graphQL/employeeQueries";
 import { useDeleteEmployee } from "../../graphQL/employeeMutations";
 
-import { Employee as IEmployee } from "../../types/types";
-import { Employee } from "../../model/objectClasses";
+import { Employee } from "../../types/types";
 import EmployeeDataTable from "./EmployeeDataTable";
 import AddIcon from "@mui/icons-material/AddBox";
 import ModalPortal from "../UI/ModalPortal";
 import useModal from "../../hooks/useModal";
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import EmployeeModalContent from "./EmployeeModalContent";
 import DeleteModal from "../UI/DeleteModal";
-import DBContext from "../../store/db/DBContext";
+
+const initEmployee: Employee = {
+  id: "-1",
+  name: "",
+  email: "",
+  role: "",
+};
+
+const initModalInfo: ModalInfoInterface = {
+  type: "NEW",
+  header: "New Employee",
+  employee: initEmployee,
+};
+
+interface ModalInfoInterface {
+  type: string;
+  header: string;
+  employee: Employee;
+}
 
 const EmployeeList = () => {
-  const dbContext = useContext(DBContext);
-
   const { isShowing: showEmployeeModal, toggle: toggleEmployeeModal } =
     useModal();
   const { isShowing: showDeleteModal, toggle: toggleDeleteModal } = useModal();
-  const { deleteEmployee } = useDeleteEmployee();
 
-  const [modalHeader, setModalHeader] = useState<string>("");
-  const [selectedEmployee, setSelectedEmployee] = useState<IEmployee>(
-    new Employee()
-  );
+  const [deleteEmployee] = useDeleteEmployee();
+
+  const [modalInfo, setModalInfo] = useState<ModalInfoInterface>(initModalInfo);
 
   const { loading, error, data } = useGetAllEmployees();
 
-  useEffect(() => {
-    let employees =
-      data && data.employees && data.employees.length > 0 ? data.employees : [];
-
-    dbContext.storeEmployeeList(employees);
-  }, [data]);
-
-  const onNewEmployee = () => {
-    setModalHeader("New Employee");
-    setSelectedEmployee(new Employee());
+  const onNew = () => {
+    setModalInfo(initModalInfo);
     toggleEmployeeModal();
   };
 
-  const onEdit = (employeeId: number) => {
-    const selectedEmp: IEmployee | undefined = dbContext.employees.find(
-      (emp) => emp.id === employeeId
-    );
-
-    if (selectedEmp) {
-      setModalHeader("Edit Employee");
-      setSelectedEmployee(selectedEmp);
-      toggleEmployeeModal();
-    }
-  };
-
-  const onDelete = (employeeId: number) => {
-    const selectedEmp: IEmployee | undefined = dbContext.employees.find(
-      (emp) => emp.id === employeeId
-    );
-
-    if (selectedEmp) {
-      setSelectedEmployee(selectedEmp);
-      toggleDeleteModal();
-    }
-  };
-
-  const onDeleteConfirm = (employeeId: number) => {
-    deleteEmployee(employeeId).then(() => {
-      dbContext.deleteEmployee(employeeId);
+  const onEdit = (selectedEmployee: Employee) => {
+    setModalInfo({
+      type: "UPDATE",
+      header: "Update Employee",
+      employee: selectedEmployee,
     });
+    toggleEmployeeModal();
+  };
+
+  const onDelete = (selectedEmployee: Employee) => {
+    setModalInfo({
+      type: "DELETE",
+      header: "Delete Employee",
+      employee: selectedEmployee,
+    });
+    toggleDeleteModal();
+  };
+
+  const onDeleteConfirm = () => {
+    if (modalInfo.employee && modalInfo.employee.id) {
+      deleteEmployee({ variables: { id: modalInfo.employee.id } });
+    }
   };
 
   if (loading) {
@@ -90,7 +90,7 @@ const EmployeeList = () => {
         <CardHeader
           title="Employees"
           action={
-            <IconButton aria-label="settings" onClick={onNewEmployee}>
+            <IconButton aria-label="settings" onClick={onNew}>
               <AddIcon />
             </IconButton>
           }
@@ -98,7 +98,7 @@ const EmployeeList = () => {
 
         <CardContent>
           <EmployeeDataTable
-            employees={dbContext.employees}
+            employees={data?.employees || []}
             editEmployee={onEdit}
             deleteEmployee={onDelete}
           />
@@ -106,25 +106,25 @@ const EmployeeList = () => {
       </Card>
 
       <ModalPortal
-        header={modalHeader}
+        header={modalInfo.header}
         showModal={showEmployeeModal}
         closeModal={toggleEmployeeModal}
       >
         <EmployeeModalContent
-          employee={selectedEmployee}
+          type={modalInfo.type}
+          employee={modalInfo.employee}
           close={toggleEmployeeModal}
         />
       </ModalPortal>
 
       <ModalPortal
-        header="Delete Employee"
+        header={modalInfo.header}
         showModal={showDeleteModal}
         closeModal={toggleDeleteModal}
       >
         <DeleteModal
           type="Employee"
-          name={selectedEmployee?.name}
-          id={selectedEmployee?.id}
+          name={modalInfo.employee.name || ""}
           confirmMethod={onDeleteConfirm}
           closeModal={toggleDeleteModal}
         />

@@ -6,5 +6,16 @@ const httpLink = createHttpLink({
 
 export const apolloClient = new ApolloClient({
   link: httpLink,
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    addTypename: true,
+    typePolicies: {
+      Query: {
+        fields: {
+          employees: {
+            merge: false,
+          },
+        },
+      },
+    },
+  }),
 });

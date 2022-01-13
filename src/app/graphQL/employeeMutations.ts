@@ -1,16 +1,16 @@
 // GraphQL Mutations
 
 import { gql, useMutation } from "@apollo/client";
-import { Employee } from "../types/types";
+import { EmployeesResponse, GET_ALL_EMPLOYEES } from "./employeeQueries";
 
 export const ADD_EMPLOYEE = gql`
   mutation AddEmployee(
-    $addEmployeeId: String!
+    $id: String!
     $name: String!
     $email: String!
     $role: String!
   ) {
-    addEmployee(id: $addEmployeeId, name: $name, email: $email, role: $role) {
+    addEmployee(id: $id, name: $name, email: $email, role: $role) {
       id
       name
       email
@@ -21,113 +21,102 @@ export const ADD_EMPLOYEE = gql`
 
 export const UPDATE_EMPLOYEE = gql`
   mutation UpdateEmployee(
-    $updateEmployeeId: String!
+    $id: String!
     $name: String
     $email: String
     $role: String
   ) {
-    updateEmployee(
-      id: $updateEmployeeId
-      name: $name
-      email: $email
-      role: $role
-    )
+    updateEmployee(id: $id, name: $name, email: $email, role: $role) {
+      id
+      name
+      email
+      role
+    }
   }
 `;
 
 export const DELETE_EMPLOYEE = gql`
-  mutation DeleteEmployee($deleteEmployeeId: String!) {
-    deleteEmployee(id: $deleteEmployeeId)
+  mutation DeleteEmployee($id: String!) {
+    deleteEmployee(id: $id) {
+      id
+    }
   }
 `;
 
-export interface NewUpdateEmployee {
-  addEmployeeId: String;
-  name: String;
-  email: String;
-  role: String;
-}
+// GraphQL Mutations Custom HooK
 
-export interface DeleteEmployee {
-  deleteEmployeeId: String;
-}
+export const useAddEmployee = (onComplete: () => void) => {
+  return useMutation(ADD_EMPLOYEE, {
+    // Update the Cache
+    update: (cache, data) => {
+      const cachedData = cache.readQuery<EmployeesResponse>({
+        query: GET_ALL_EMPLOYEES,
+      });
+      const employees = cachedData?.employees || [];
+      const newEmployee = data.data.addEmployee;
+      const updatedEmployees = [...employees, newEmployee];
 
-export const useAddEmployee = () => {
-  const [addEmployee, { data, loading, error }] = useMutation(ADD_EMPLOYEE);
-
-  const runAddEmployee = (newEmployee: Employee) => {
-    return addEmployee({
-      variables: {
-        addEmployeeId: String(newEmployee.id),
-        name: newEmployee.name,
-        email: newEmployee.email,
-        role: newEmployee.role,
-      },
-    });
-  };
-
-  return {
-    addEmployee: runAddEmployee,
-    data: data,
-    loading: loading,
-    error: error,
-  };
-};
-/*
-export const useAddEmployee = (newEmployee: Employee, onComplete: (employee: Employee) => {}) => {
-  return useMutation<EmployeeResponse, NewUpdateEmployee>(ADD_EMPLOYEE, {
-    variables: {
-      addEmployeeId: String(newEmployee.id),
-      name: newEmployee.name,
-      email: newEmployee.email,
-      role: newEmployee.role,
+      cache.writeQuery({
+        query: GET_ALL_EMPLOYEES,
+        data: { employees: updatedEmployees },
+      });
     },
-    onCompleted(data) {
-        onComplete(data.employee);
-    }
+    // Run a given method on complete
+    onCompleted: onComplete,
   });
 };
-*/
 
-export const useUpdateEmployee = () => {
-  const [updateEmployee, { data, loading, error }] =
-    useMutation(UPDATE_EMPLOYEE);
+export const useUpdateEmployee = (onComplete: () => void) => {
+  return useMutation(UPDATE_EMPLOYEE, {
+    // Update the Cache
+    update: (cache, data) => {
+      const cachedData = cache.readQuery<EmployeesResponse>({
+        query: GET_ALL_EMPLOYEES,
+      });
+      const employees = cachedData?.employees || [];
+      const updatedEmployee = data.data.updateEmployee;
+      const updatedEmployees = [...employees];
 
-  const runUpdateEmployee = (newEmployee: Employee) => {
-    return updateEmployee({
-      variables: {
-        updateEmployeeId: String(newEmployee.id),
-        name: newEmployee.name,
-        email: newEmployee.email,
-        role: newEmployee.role,
-      },
-    });
-  };
+      const existEmpIdx = employees.findIndex(
+        (emp) => emp.id === updatedEmployee.id
+      );
+      const existEmp = employees[existEmpIdx];
 
-  return {
-    updateEmployee: runUpdateEmployee,
-    data: data,
-    loading: loading,
-    error: error,
-  };
+      updatedEmployees[existEmpIdx] = {
+        ...existEmp,
+        name: updatedEmployee.name,
+        email: updatedEmployee.email,
+        role: updatedEmployee.role,
+      };
+
+      cache.writeQuery({
+        query: GET_ALL_EMPLOYEES,
+        data: { employees: updatedEmployees },
+      });
+    },
+    // Run a given method on complete
+    onCompleted: onComplete,
+  });
 };
 
 export const useDeleteEmployee = () => {
-  const [deleteEmployee, { data, loading, error }] =
-    useMutation(DELETE_EMPLOYEE);
+  return useMutation(DELETE_EMPLOYEE, {
+    // Update the Cache
+    update: (cache, data) => {
+      const cachedData = cache.readQuery<EmployeesResponse>({
+        query: GET_ALL_EMPLOYEES,
+      });
+      const employees = cachedData?.employees || [];
+      console.log(data);
+      const removedEmployeeId = data.data.deleteEmployee.id;
+      const updatedEmployees = [
+        ...employees.filter((emp) => emp.id !== removedEmployeeId),
+      ];
 
-  const runDeleteEmployee = (employeeId: number) => {
-    return deleteEmployee({
-      variables: {
-        deleteEmployeeId: String(employeeId),
-      },
-    });
-  };
-
-  return {
-    deleteEmployee: runDeleteEmployee,
-    data: data,
-    loading: loading,
-    error: error,
-  };
+      cache.writeQuery({
+        query: GET_ALL_EMPLOYEES,
+        data: { employees: updatedEmployees },
+      });
+    },
+  });
 };

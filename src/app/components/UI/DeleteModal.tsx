@@ -4,16 +4,17 @@ import Button from "@mui/material/Button";
 
 interface DeleteModalInterface {
   type: string;
-  name: string | undefined;
-  id: number;
-  confirmMethod: (id: number) => void;
+  name: string
+  confirmMethod: () => void;
   closeModal: () => void;
 }
 
 const DeleteModal = (props: DeleteModalInterface) => {
+  const {type, name, confirmMethod, closeModal } = props;
+
   const onConfirm = () => {
-    props.confirmMethod(props.id);
-    props.closeModal();
+    confirmMethod();
+    closeModal();
   };
 
   return (
@@ -26,7 +27,7 @@ const DeleteModal = (props: DeleteModalInterface) => {
         autoComplete="off"
       >
         <Typography sx={{ m: 1 }}>
-          Are you sure you want to delete {props.type}: {props.name}?
+          Are you sure you want to delete {type}: {name}?
         </Typography>
       </Box>
 

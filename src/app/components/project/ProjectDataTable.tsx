@@ -36,11 +36,13 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 interface ProjectDataTableInterface {
   projects: Project[];
-  editProject: (projectId: number) => void;
-  deleteProject: (projectId: number) => void;
+  editProject: (project: Project) => void;
+  deleteProject: (project: Project) => void;
 }
 
 const ProjectDataTable = (props: ProjectDataTableInterface) => {
+  const {projects, editProject, deleteProject } = props;
+
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -57,7 +59,7 @@ const ProjectDataTable = (props: ProjectDataTableInterface) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {props.projects.map((proj) => (
+          {projects.map((proj) => (
             <StyledTableRow
               key={proj.id}
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -76,13 +78,13 @@ const ProjectDataTable = (props: ProjectDataTableInterface) => {
               <StyledTableCell component="th" scope="row" align="center">
                 <IconButton
                   aria-label="edit"
-                  onClick={() => props.editProject(proj.id)}
+                  onClick={() => editProject(proj)}
                 >
                   <EditIcon />
                 </IconButton>
                 <IconButton
                   aria-label="delete"
-                  onClick={() => props.deleteProject(proj.id)}
+                  onClick={() => deleteProject(proj)}
                 >
                   <DeleteIcon />
                 </IconButton>

@@ -5,42 +5,73 @@ import {
   CircularProgress,
   IconButton,
 } from "@mui/material";
-import { useGetAllProjects } from "../../graphQL/project";
+import { useGetAllProjects } from "../../graphQL/projectQueries";
 import ProjectDataTable from "./ProjectDataTable";
 import AddIcon from "@mui/icons-material/AddBox";
-import { useContext, useEffect, useState } from "react";
 import useModal from "../../hooks/useModal";
-import ProjectEditModalContent from "./ProjectEditModalContent";
 import ModalPortal from "../UI/ModalPortal";
 import { Project } from "../../types/types";
 import DeleteModal from "../UI/DeleteModal";
-import DBContext from "../../store/db/DBContext";
+import ProjectEditModalContent from "./ProjectModalContent";
+import { useState } from "react";
+import { useDeleteProject } from "../../graphQL/projectMutations";
+
+const initProject: Project = {
+  id: "-1",
+  name: "",
+  description: "",
+};
+
+const initModalInfo: ModalInfoInterface = {
+  type: "NEW",
+  header: "New Project",
+  project: initProject,
+};
+
+interface ModalInfoInterface {
+  type: string;
+  header: string;
+  project: Project;
+}
 
 const ProjectList = () => {
-  const dbContext = useContext(DBContext);
-
-  const { isShowing: showEditModal, toggle: toggleEditModal } = useModal();
+  const { isShowing: showProjectModal, toggle: toggleProjectModal } =
+    useModal();
   const { isShowing: showDeleteModal, toggle: toggleDeleteModal } = useModal();
+
+  const [deleteProject] = useDeleteProject();
+
+  const [modalInfo, setModalInfo] = useState<ModalInfoInterface>(initModalInfo);
 
   const { loading, error, data } = useGetAllProjects();
 
-  useEffect(() => {
-    let projects =
-      data && data.projects && data.projects.length > 0 ? data.projects : [];
-
-    dbContext.storeProjectList(projects);
-  }, [data]);
-
-  const [selectedProject, setSelectedProject] = useState<Project | undefined>();
-
-  const onEdit = (projectId: number) => {
-    setSelectedProject(dbContext.projects.find((emp) => emp.id === projectId));
-    toggleEditModal();
+  const onNew = () => {
+    setModalInfo(initModalInfo);
+    toggleProjectModal();
   };
 
-  const onDelete = (projectId: number) => {
-    setSelectedProject(dbContext.projects.find((emp) => emp.id === projectId));
+  const onEdit = (selectedProject: Project) => {
+    setModalInfo({
+      type: "UPDATE",
+      header: "Update Project",
+      project: selectedProject,
+    });
+    toggleProjectModal();
+  };
+
+  const onDelete = (selectedProject: Project) => {
+    setModalInfo({
+      type: "DELETE",
+      header: "Delete Project",
+      project: selectedProject,
+    });
     toggleDeleteModal();
+  };
+
+  const onDeleteConfirm = () => {
+    if (modalInfo.project && modalInfo.project.id) {
+      deleteProject({ variables: { id: modalInfo.project.id } });
+    }
   };
 
   if (loading) {
@@ -56,7 +87,7 @@ const ProjectList = () => {
       <CardHeader
         title="Projects"
         action={
-          <IconButton aria-label="settings">
+          <IconButton aria-label="settings" onClick={onNew}>
             <AddIcon />
           </IconButton>
         }
@@ -65,26 +96,35 @@ const ProjectList = () => {
       </CardHeader>
       <CardContent>
         <ProjectDataTable
-          projects={dbContext.projects}
+          projects={data?.projects || []}
           editProject={onEdit}
           deleteProject={onDelete}
         />
       </CardContent>
 
       <ModalPortal
-        header="Edit Employee"
-        showModal={showEditModal}
-        closeModal={toggleEditModal}
+        header={modalInfo.header}
+        showModal={showProjectModal}
+        closeModal={toggleProjectModal}
       >
-        <ProjectEditModalContent project={selectedProject} />
+        <ProjectEditModalContent
+          type={modalInfo.type}
+          project={modalInfo.project}
+          close={toggleProjectModal}
+        />
       </ModalPortal>
 
       <ModalPortal
-        header="Delete Employee"
+        header={modalInfo.header}
         showModal={showDeleteModal}
         closeModal={toggleDeleteModal}
       >
-        {/*<DeleteModal type="Project" name={selectedProject?.name} id={selectedProject?.id} />*/}
+        <DeleteModal
+          type="Project"
+          name={modalInfo.project.name || ""}
+          confirmMethod={onDeleteConfirm}
+          closeModal={toggleDeleteModal}
+        />{" "}
       </ModalPortal>
     </Card>
   );

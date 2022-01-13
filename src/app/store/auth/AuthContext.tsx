@@ -1,5 +1,5 @@
 import React, { ReactNode, useState } from "react";
-import { UserInfo } from "../../model/userInfo";
+import { UserInfo } from "../../types/types";
 
 // CONTEXT
 interface AuthContextInterface {
@@ -36,7 +36,7 @@ const getLoggedInUserInfo = () => {
 
   return {
     logged: loggedIn,
-    loggedUserInfo: new UserInfo(loggedUserName, loggedUserRole),
+    loggedUserInfo: {userName: loggedUserName, role: loggedUserRole},
   };
 };
 
@@ -58,7 +58,7 @@ export const AuthContextProvider = (props: AuthContextProviderInterface) => {
     );
 
     // Store the user info in the storage
-    localStorage.setItem("userName", userInfo.name);
+    localStorage.setItem("userName", userInfo.userName);
     localStorage.setItem("userRole", userInfo.role);
 
     setIsLoggedIn(true);
@@ -67,7 +67,7 @@ export const AuthContextProvider = (props: AuthContextProviderInterface) => {
 
   const logoutHandler = () => {
     setIsLoggedIn(false);
-    setUserInfo(new UserInfo());
+    setUserInfo({userName: "", role: ""});
 
     localStorage.clear();
   };
