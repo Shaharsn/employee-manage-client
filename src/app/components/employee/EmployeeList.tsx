@@ -14,8 +14,9 @@ import AddIcon from "@mui/icons-material/AddBox";
 import ModalPortal from "../UI/ModalPortal";
 import useModal from "../../hooks/useModal";
 import { useState } from "react";
-import EmployeeModalContent from "./EmployeeModalContent";
+import EmployeeNewEditForm from "./EmployeeNewEditForm";
 import DeleteModal from "../UI/DeleteModal";
+import EmployeeProjects from "./EmployeeProjects";
 
 const initEmployee: Employee = {
   id: "-1",
@@ -24,13 +25,13 @@ const initEmployee: Employee = {
   role: "",
 };
 
-const initModalInfo: ModalInfoInterface = {
+const initModalInfo: IModalInfo = {
   type: "NEW",
   header: "New Employee",
   employee: initEmployee,
 };
 
-interface ModalInfoInterface {
+interface IModalInfo {
   type: string;
   header: string;
   employee: Employee;
@@ -40,10 +41,14 @@ const EmployeeList = () => {
   const { isShowing: showEmployeeModal, toggle: toggleEmployeeModal } =
     useModal();
   const { isShowing: showDeleteModal, toggle: toggleDeleteModal } = useModal();
+  const {
+    isShowing: showEmployeeProjectsModal,
+    toggle: toggleEmployeeProjectsModal,
+  } = useModal();
 
   const [deleteEmployee] = useDeleteEmployee();
 
-  const [modalInfo, setModalInfo] = useState<ModalInfoInterface>(initModalInfo);
+  const [modalInfo, setModalInfo] = useState<IModalInfo>(initModalInfo);
 
   const { loading, error, data } = useGetAllEmployees();
 
@@ -76,6 +81,15 @@ const EmployeeList = () => {
     }
   };
 
+  const onShowEmployeeProject = (selectedEmployee: Employee) => {
+    setModalInfo({
+      type: "EMPLOYEE_PROJECTS",
+      header: selectedEmployee.name + "'s Projects",
+      employee: selectedEmployee,
+    });
+    toggleEmployeeProjectsModal();
+  };
+
   if (loading) {
     return <CircularProgress />;
   }
@@ -101,6 +115,7 @@ const EmployeeList = () => {
             employees={data?.employees || []}
             editEmployee={onEdit}
             deleteEmployee={onDelete}
+            showEmployeeProject={onShowEmployeeProject}
           />
         </CardContent>
       </Card>
@@ -110,7 +125,7 @@ const EmployeeList = () => {
         showModal={showEmployeeModal}
         closeModal={toggleEmployeeModal}
       >
-        <EmployeeModalContent
+        <EmployeeNewEditForm
           type={modalInfo.type}
           employee={modalInfo.employee}
           close={toggleEmployeeModal}
@@ -127,6 +142,17 @@ const EmployeeList = () => {
           name={modalInfo.employee.name || ""}
           confirmMethod={onDeleteConfirm}
           closeModal={toggleDeleteModal}
+        />
+      </ModalPortal>
+
+      <ModalPortal
+        header={modalInfo.header}
+        showModal={showEmployeeProjectsModal}
+        closeModal={toggleEmployeeProjectsModal}
+      >
+        <EmployeeProjects
+          employee={modalInfo.employee}
+          close={toggleEmployeeProjectsModal}
         />
       </ModalPortal>
     </>

@@ -23,13 +23,13 @@ const roleOptions = [
   },
 ];
 
-interface EmployeeEditModalContentInterface {
+interface IEmployeeNewEditFormProps {
   type: string;
   employee: Employee;
   close: () => void;
 }
 
-const EmployeeModalContent = (props: EmployeeEditModalContentInterface) => {
+const EmployeeNewEditForm = (props: IEmployeeNewEditFormProps) => {
   const { type, employee, close } = props;
 
   const [addEmployee] = useAddEmployee(close);
@@ -120,4 +120,4 @@ const EmployeeModalContent = (props: EmployeeEditModalContentInterface) => {
     </>
   );
 };
-export default EmployeeModalContent;
+export default EmployeeNewEditForm;

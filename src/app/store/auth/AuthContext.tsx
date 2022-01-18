@@ -2,14 +2,14 @@ import React, { ReactNode, useState } from "react";
 import { UserInfo } from "../../types/types";
 
 // CONTEXT
-interface AuthContextInterface {
+interface IAuthContextInterface {
   isLoggedIn: boolean;
   userInfo: UserInfo | undefined;
   login: (userInfo: UserInfo) => void;
   logout: () => void;
 }
 
-const AuthContext = React.createContext<AuthContextInterface>({
+const AuthContext = React.createContext<IAuthContextInterface>({
   isLoggedIn: false,
   userInfo: undefined,
   login: () => {},
@@ -40,11 +40,11 @@ const getLoggedInUserInfo = () => {
   };
 };
 
-interface AuthContextProviderInterface {
+interface IAuthContextProvider {
   children: ReactNode;
 }
 
-export const AuthContextProvider = (props: AuthContextProviderInterface) => {
+export const AuthContextProvider = (props: IAuthContextProvider) => {
   const { logged, loggedUserInfo } = getLoggedInUserInfo();
 
   const [isLoggedIn, setIsLoggedIn] = useState(logged);
@@ -72,7 +72,7 @@ export const AuthContextProvider = (props: AuthContextProviderInterface) => {
     localStorage.clear();
   };
 
-  const contextValue: AuthContextInterface = {
+  const contextValue: IAuthContextInterface = {
     isLoggedIn: isLoggedIn,
     userInfo: userInfo,
     login: loginHandler,

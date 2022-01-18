@@ -14,6 +14,9 @@ export const apolloClient = new ApolloClient({
           employees: {
             merge: false,
           },
+          projects: {
+            merge: false,
+          },
         },
       },
     },

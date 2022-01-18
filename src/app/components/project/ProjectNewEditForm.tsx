@@ -8,13 +8,13 @@ import {
   useUpdateProject,
 } from "../../graphQL/projectMutations";
 
-interface ProjectEditModalContentInterface {
+interface IProjectNewEditForm {
   type: string;
   project: Project;
   close: () => void;
 }
 
-const ProjectEditModalContent = (props: ProjectEditModalContentInterface) => {
+const ProjectNewEditForm = (props: IProjectNewEditForm) => {
   const { type, project, close } = props;
 
   const [addProject] = useAddProject(close);
@@ -87,4 +87,4 @@ const ProjectEditModalContent = (props: ProjectEditModalContentInterface) => {
     </>
   );
 };
-export default ProjectEditModalContent;
+export default ProjectNewEditForm;

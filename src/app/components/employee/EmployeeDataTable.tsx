@@ -35,14 +35,16 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-interface EmployeeDataTableInterface {
+interface IEmployeeDataTableProps {
   employees: Employee[];
   editEmployee: (employee: Employee) => void;
   deleteEmployee: (employee: Employee) => void;
+  showEmployeeProject: (employee: Employee) => void;
 }
 
-const EmployeeDataTable = (props: EmployeeDataTableInterface) => {
-  const { employees, editEmployee, deleteEmployee } = props;
+const EmployeeDataTable = (props: IEmployeeDataTableProps) => {
+  const { employees, editEmployee, deleteEmployee, showEmployeeProject } =
+    props;
 
   return (
     <TableContainer component={Paper}>
@@ -77,7 +79,12 @@ const EmployeeDataTable = (props: EmployeeDataTableInterface) => {
               </StyledTableCell>
 
               <StyledTableCell component="th" scope="row">
-                <Button variant="text">Projects</Button>
+                <Button
+                  variant="text"
+                  onClick={() => showEmployeeProject(employee)}
+                >
+                  Projects
+                </Button>
               </StyledTableCell>
 
               <StyledTableCell component="th" scope="row" align="center">

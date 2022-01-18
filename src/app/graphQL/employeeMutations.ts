@@ -1,7 +1,8 @@
 // GraphQL Mutations
 
 import { gql, useMutation } from "@apollo/client";
-import { EmployeesResponse, GET_ALL_EMPLOYEES } from "./employeeQueries";
+import { Employee, Project } from "../types/types";
+import { IEmployeesResponse, GET_ALL_EMPLOYEES, useGetAllEmployees } from "./employeeQueries";
 
 export const ADD_EMPLOYEE = gql`
   mutation AddEmployee(
@@ -43,13 +44,26 @@ export const DELETE_EMPLOYEE = gql`
   }
 `;
 
+export const UPDATE_EMPLOYEE_PROJECTS = gql`
+  mutation UpdateEmployeeProjects($employeesWithProjects: [EmployeesWithProjects!]) {
+    updateEmployeeProjects(employeesWithProjects: $employeesWithProjects) {
+      id
+      projects {
+        id
+        name
+        description
+      }
+    }
+  }
+`;
+
 // GraphQL Mutations Custom HooK
 
 export const useAddEmployee = (onComplete: () => void) => {
   return useMutation(ADD_EMPLOYEE, {
     // Update the Cache
     update: (cache, data) => {
-      const cachedData = cache.readQuery<EmployeesResponse>({
+      const cachedData = cache.readQuery<IEmployeesResponse>({
         query: GET_ALL_EMPLOYEES,
       });
       const employees = cachedData?.employees || [];
@@ -70,7 +84,7 @@ export const useUpdateEmployee = (onComplete: () => void) => {
   return useMutation(UPDATE_EMPLOYEE, {
     // Update the Cache
     update: (cache, data) => {
-      const cachedData = cache.readQuery<EmployeesResponse>({
+      const cachedData = cache.readQuery<IEmployeesResponse>({
         query: GET_ALL_EMPLOYEES,
       });
       const employees = cachedData?.employees || [];
@@ -103,7 +117,7 @@ export const useDeleteEmployee = () => {
   return useMutation(DELETE_EMPLOYEE, {
     // Update the Cache
     update: (cache, data) => {
-      const cachedData = cache.readQuery<EmployeesResponse>({
+      const cachedData = cache.readQuery<IEmployeesResponse>({
         query: GET_ALL_EMPLOYEES,
       });
       const employees = cachedData?.employees || [];
@@ -119,4 +133,107 @@ export const useDeleteEmployee = () => {
       });
     },
   });
+};
+
+export const useUpdateEmployeesProjects = (onComplete?: () => void) => {
+  return useMutation(UPDATE_EMPLOYEE_PROJECTS, {
+    // Update the Cache
+    update: (cache, data) => {
+      const cachedData = cache.readQuery<IEmployeesResponse>({
+        query: GET_ALL_EMPLOYEES,
+      });
+      const employees = cachedData?.employees || [];
+      const updatedEmployeeProjects = data.data.updateEmployeeProjects;
+      const updatedEmployees = [...employees];
+
+      updatedEmployeeProjects.forEach((emp: Employee) => {
+        let existEmpIdx = employees.findIndex(
+          (emp) => emp.id === updatedEmployeeProjects.id
+        );
+        let existEmp = employees[existEmpIdx];
+  
+        updatedEmployees[existEmpIdx] = {
+          ...existEmp,
+          projects: updatedEmployeeProjects.employees,
+        };
+      });
+
+      cache.writeQuery({
+        query: GET_ALL_EMPLOYEES,
+        data: { employees: updatedEmployees },
+      });
+    },
+    // Run a given method on complete
+    onCompleted: onComplete,
+  });
+};
+
+export const useAddProjectToEmployees = () => {
+  const [updateEmployeeProjects] = useUpdateEmployeesProjects();
+  const { data } = useGetAllEmployees();
+
+  const runAddProjectToEmployees = (
+    project: Project,
+    employees: Employee[]
+  ) => {
+    if (data) {
+      let variablesArr: {}[] = [];
+
+      // Get all the employees that includes the project inside their project list
+      let employeesIncludesTheProject = data.employees.filter(emp => emp.projects?.some(emp => emp.id === project.id));
+
+      // Remove the Project from Employee hold him and now they not need too
+      employeesIncludesTheProject.forEach((emp) => {
+        if (!employees.find((e) => e.id === emp.id)) {
+          let empProjects =
+            emp.projects?.filter((proj) => proj.id !== project.id)
+              .map((proj) => {
+                return {
+                  id: proj.id,
+                  name: proj.name,
+                  description: proj.description,
+                };
+              }) || [];
+
+          variablesArr.push({ id: emp.id, projects: empProjects });
+        }
+      });
+
+      employees.forEach((emp) => {
+        if (!employeesIncludesTheProject.find((e) => e.id === emp.id)) {
+          // Get the employee from the data's employees
+          let existEmp = data.employees?.find((e) => e.id === emp.id);
+
+          if (existEmp) {
+            // Add all the other employees to the project's employee list
+            let empProjects =
+              existEmp.projects
+                ?.filter((proj) => proj.id !== project.id)
+                .map((proj) => {
+                  return {
+                    id: proj.id,
+                    name: proj.name,
+                    description: proj.description,
+                  };
+                }) || [];
+
+            // Adding the new employee to the project's employee list
+            empProjects?.push({
+              id: project.id,
+              name: project.name,
+              description: project.description,
+            });
+
+            variablesArr.push({ id: existEmp.id, projects: empProjects });
+          }
+        }
+      });
+
+      updateEmployeeProjects({
+        variables: { employeesWithProjects: variablesArr },
+      });
+    }
+  };
+
+  return { runAddProjectToEmployees: runAddProjectToEmployees };
 };

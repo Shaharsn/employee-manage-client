@@ -9,6 +9,11 @@ export const GET_ALL_EMPLOYEES = gql`
       name
       email
       role
+      projects {
+        id
+        name
+        description
+      }
     }
   }
 `;
@@ -41,39 +46,35 @@ export const GET_EMPLOYEE_BY_EMAIL = gql`
 `;
 
 //Interfaces
-export interface EmployeesResponse {
+export interface IEmployeesResponse {
   employees: Employee[];
 }
 
-export interface EmployeeResponse {
-  employee: Employee;
-}
-
-export interface EmployeeByEmailResponse {
+export interface IEmployeeByEmailResponse {
   employeeByEmail: Employee[];
 }
 
-export interface EmployeeByIdInput {
+export interface IEmployeeByIdInput {
   employeeById: String;
 }
 
-export interface EmployeeByEmailInput {
+export interface IEmployeeByEmailInput {
   email: String;
 }
 
 // GraphQL Queries Custom Hooks
 export const useGetAllEmployees = () => {
-  return useQuery<EmployeesResponse>(GET_ALL_EMPLOYEES);
+  return useQuery<IEmployeesResponse>(GET_ALL_EMPLOYEES);
 };
 
 export const useGetEmployeeById = (employeeById: String) => {
-  return useQuery<EmployeeByEmailResponse, EmployeeByIdInput>(GET_EMPLOYEE_BY_ID, {
+  return useQuery<IEmployeeByEmailResponse, IEmployeeByIdInput>(GET_EMPLOYEE_BY_ID, {
     variables: { employeeById },
   });
 };
 
 export const useGetEmployeeByEmail = (email: String) => {
-  return useLazyQuery<EmployeeByEmailResponse, EmployeeByEmailInput>(
+  return useLazyQuery<IEmployeeByEmailResponse, IEmployeeByEmailInput>(
     GET_EMPLOYEE_BY_EMAIL,
     {
       variables: { email },

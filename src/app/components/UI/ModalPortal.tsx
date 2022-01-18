@@ -3,27 +3,30 @@ import { Modal, Backdrop, Fade, Typography, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
 import CloseIcon from "@mui/icons-material/Close";
 
-const boxStyle = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "white",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 2,
-};
 
-interface ModalInterface {
+
+interface IModalPortalProps {
   header: string;
   children: React.ReactNode;
   showModal: boolean;
+  width?: number;
   closeModal: () => void;
 }
 
-const ModalPortal = (props: ModalInterface) => {
-  const { header, children, showModal, closeModal } = props;
+const ModalPortal = (props: IModalPortalProps) => {
+  const { header, children, showModal, width, closeModal } = props;
+
+  const boxStyle = {
+    position: "absolute" as "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: width || 400,
+    bgcolor: "white",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 2,
+  };
 
   return props.showModal
     ? ReactDOM.createPortal(

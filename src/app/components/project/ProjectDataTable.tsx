@@ -14,7 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Project } from "../../types/types";
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: ["#336fabe0"],
     color: theme.palette.common.white,
@@ -24,7 +24,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
+export const StyledTableRow = styled(TableRow)(({ theme }) => ({
   "&:nth-of-type(odd)": {
     backgroundColor: theme.palette.action.hover,
   },
@@ -34,14 +34,15 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-interface ProjectDataTableInterface {
+interface IProjectDataTableProps {
   projects: Project[];
   editProject: (project: Project) => void;
   deleteProject: (project: Project) => void;
+  showProjectEmployee: (project: Project) => void;
 }
 
-const ProjectDataTable = (props: ProjectDataTableInterface) => {
-  const {projects, editProject, deleteProject } = props;
+const ProjectDataTable = (props: IProjectDataTableProps) => {
+  const { projects, editProject, deleteProject, showProjectEmployee } = props;
 
   return (
     <TableContainer component={Paper}>
@@ -72,14 +73,16 @@ const ProjectDataTable = (props: ProjectDataTableInterface) => {
               </StyledTableCell>
 
               <StyledTableCell component="th" scope="row">
-                <Button variant="text">Users</Button>
+                <Button
+                  variant="text"
+                  onClick={() => showProjectEmployee(proj)}
+                >
+                  Users
+                </Button>
               </StyledTableCell>
 
               <StyledTableCell component="th" scope="row" align="center">
-                <IconButton
-                  aria-label="edit"
-                  onClick={() => editProject(proj)}
-                >
+                <IconButton aria-label="edit" onClick={() => editProject(proj)}>
                   <EditIcon />
                 </IconButton>
                 <IconButton

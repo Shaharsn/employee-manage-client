@@ -2,14 +2,14 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
-interface DeleteModalInterface {
+interface IDeleteModalProps {
   type: string;
   name: string
   confirmMethod: () => void;
   closeModal: () => void;
 }
 
-const DeleteModal = (props: DeleteModalInterface) => {
+const DeleteModal = (props: IDeleteModalProps) => {
   const {type, name, confirmMethod, closeModal } = props;
 
   const onConfirm = () => {

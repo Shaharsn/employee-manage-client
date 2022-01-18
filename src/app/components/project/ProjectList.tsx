@@ -6,15 +6,16 @@ import {
   IconButton,
 } from "@mui/material";
 import { useGetAllProjects } from "../../graphQL/projectQueries";
+import { useDeleteProject } from "../../graphQL/projectMutations";
+import { Project } from "../../types/types";
 import ProjectDataTable from "./ProjectDataTable";
 import AddIcon from "@mui/icons-material/AddBox";
-import useModal from "../../hooks/useModal";
 import ModalPortal from "../UI/ModalPortal";
-import { Project } from "../../types/types";
-import DeleteModal from "../UI/DeleteModal";
-import ProjectEditModalContent from "./ProjectModalContent";
+import useModal from "../../hooks/useModal";
 import { useState } from "react";
-import { useDeleteProject } from "../../graphQL/projectMutations";
+import ProjectNewEditForm from "./ProjectNewEditForm";
+import DeleteModal from "../UI/DeleteModal";
+import ProjectEmployees from "./ProjectEmployees";
 
 const initProject: Project = {
   id: "-1",
@@ -22,13 +23,13 @@ const initProject: Project = {
   description: "",
 };
 
-const initModalInfo: ModalInfoInterface = {
+const initModalInfo: IModalInfo = {
   type: "NEW",
   header: "New Project",
   project: initProject,
 };
 
-interface ModalInfoInterface {
+interface IModalInfo {
   type: string;
   header: string;
   project: Project;
@@ -38,10 +39,14 @@ const ProjectList = () => {
   const { isShowing: showProjectModal, toggle: toggleProjectModal } =
     useModal();
   const { isShowing: showDeleteModal, toggle: toggleDeleteModal } = useModal();
+  const {
+    isShowing: showProjectEmployeesModal,
+    toggle: toggleProjectEmployeesModal,
+  } = useModal();
 
   const [deleteProject] = useDeleteProject();
 
-  const [modalInfo, setModalInfo] = useState<ModalInfoInterface>(initModalInfo);
+  const [modalInfo, setModalInfo] = useState<IModalInfo>(initModalInfo);
 
   const { loading, error, data } = useGetAllProjects();
 
@@ -74,6 +79,15 @@ const ProjectList = () => {
     }
   };
 
+  const onShowProjectEmployee = (selectedProject: Project) => {
+    setModalInfo({
+      type: "PROJECT_EMPLOYEES",
+      header: selectedProject.name + "'s Employees",
+      project: selectedProject,
+    });
+    toggleProjectEmployeesModal();
+  };
+
   if (loading) {
     return <CircularProgress />;
   }
@@ -83,31 +97,32 @@ const ProjectList = () => {
   }
 
   return (
-    <Card sx={{ marginTop: ["40px"] }}>
-      <CardHeader
-        title="Projects"
-        action={
-          <IconButton aria-label="settings" onClick={onNew}>
-            <AddIcon />
-          </IconButton>
-        }
-      >
-        <AddIcon />
-      </CardHeader>
-      <CardContent>
-        <ProjectDataTable
-          projects={data?.projects || []}
-          editProject={onEdit}
-          deleteProject={onDelete}
+    <>
+      <Card sx={{ marginTop: ["40px"] }}>
+        <CardHeader
+          title="Projects"
+          action={
+            <IconButton aria-label="settings" onClick={onNew}>
+              <AddIcon />
+            </IconButton>
+          }
         />
-      </CardContent>
 
+        <CardContent>
+          <ProjectDataTable
+            projects={data?.projects || []}
+            editProject={onEdit}
+            deleteProject={onDelete}
+            showProjectEmployee={onShowProjectEmployee}
+          />
+        </CardContent>
+      </Card>
       <ModalPortal
         header={modalInfo.header}
         showModal={showProjectModal}
         closeModal={toggleProjectModal}
       >
-        <ProjectEditModalContent
+        <ProjectNewEditForm
           type={modalInfo.type}
           project={modalInfo.project}
           close={toggleProjectModal}
@@ -124,9 +139,20 @@ const ProjectList = () => {
           name={modalInfo.project.name || ""}
           confirmMethod={onDeleteConfirm}
           closeModal={toggleDeleteModal}
-        />{" "}
+        />
       </ModalPortal>
-    </Card>
+
+      <ModalPortal
+        header={modalInfo.header}
+        showModal={showProjectEmployeesModal}
+        closeModal={toggleProjectEmployeesModal}
+      >
+        <ProjectEmployees
+          project={modalInfo.project}
+          close={toggleProjectEmployeesModal}
+        />
+      </ModalPortal>
+    </>
   );
 };
 export default ProjectList;

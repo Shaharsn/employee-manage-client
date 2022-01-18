@@ -8,6 +8,12 @@ export const GET_ALL_PROJECTS = gql`
       id
       name
       description
+      employees {
+        id
+        name
+        email
+        role
+      }
     }
   }
 `;
@@ -61,26 +67,26 @@ export const DELETE_PROJECT = gql`
 `;
 
 //Interfaces
-export interface ProjectsResponse {
+export interface IProjectsResponse {
   projects: [Project];
 }
 
-export interface ProjectByIdInput {
+export interface IProjectByIdInput {
   projectById: string;
 }
 
-export interface ProjectByIdResponse {
+export interface IProjectByIdResponse {
   project: Project;
 }
 
 // GraphQL Queries Methods
 export const useGetAllProjects = () => {
-  return useQuery<ProjectsResponse>(GET_ALL_PROJECTS);
+  return useQuery<IProjectsResponse>(GET_ALL_PROJECTS);
 };
 
 // GraphQL Queries Methods
 export const useGetProjectById = (projectById: string) => {
-  return useQuery<ProjectByIdResponse, ProjectByIdInput>(GET_ALL_PROJECTS, {
+  return useQuery<IProjectByIdResponse, IProjectByIdInput>(GET_ALL_PROJECTS, {
     variables: { projectById },
   });
 };
