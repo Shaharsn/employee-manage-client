@@ -6,7 +6,7 @@ import Login from "./app/components/login/Login";
 import "./App.css";
 import Navbar from "./app/components/navbar/Navbar";
 
-function App() {
+const App = () => {
   return (
     <AuthContextProvider>
       <Navbar />

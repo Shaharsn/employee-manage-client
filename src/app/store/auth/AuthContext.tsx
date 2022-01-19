@@ -16,7 +16,6 @@ const AuthContext = React.createContext<IAuthContextInterface>({
   logout: () => {},
 });
 
-// CONTEXT PROVIDER
 
 // Check if the user still logged in
 const getLoggedInUserInfo = () => {
@@ -43,6 +42,8 @@ const getLoggedInUserInfo = () => {
 interface IAuthContextProvider {
   children: ReactNode;
 }
+
+// CONTEXT PROVIDER
 
 export const AuthContextProvider = (props: IAuthContextProvider) => {
   const { logged, loggedUserInfo } = getLoggedInUserInfo();
