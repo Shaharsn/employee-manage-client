@@ -2,7 +2,11 @@
 
 import { gql, useMutation } from "@apollo/client";
 import { Employee, Project } from "../types/types";
-import { IEmployeesResponse, GET_ALL_EMPLOYEES, useGetAllEmployees } from "./employeeQueries";
+import {
+  IEmployeesResponse,
+  GET_ALL_EMPLOYEES,
+  useGetAllEmployees,
+} from "./employeeQueries";
 
 export const ADD_EMPLOYEE = gql`
   mutation AddEmployee(
@@ -45,7 +49,9 @@ export const DELETE_EMPLOYEE = gql`
 `;
 
 export const UPDATE_EMPLOYEE_PROJECTS = gql`
-  mutation UpdateEmployeeProjects($employeesWithProjects: [EmployeesWithProjects!]) {
+  mutation UpdateEmployeeProjects(
+    $employeesWithProjects: [EmployeesWithProjects!]
+  ) {
     updateEmployeeProjects(employeesWithProjects: $employeesWithProjects) {
       id
       projects {
@@ -143,27 +149,25 @@ export const useUpdateEmployeesProjects = (onComplete?: () => void) => {
         query: GET_ALL_EMPLOYEES,
       });
       const employees = cachedData?.employees || [];
-      const updatedEmployeeProjects = data.data.updateEmployeeProjects;
+      const updatedEmployeeId = data.data.updateEmployeeProjects.id;
+      const updatedProjects = data.data.updateEmployeeProjects.projects;
       const updatedEmployees = [...employees];
-      console.log(updatedEmployeeProjects);
-      console.log(updatedEmployees);
 
-      updatedEmployeeProjects.forEach((emp: Employee) => {
-        let existEmpIdx = employees.findIndex(
-          (emp) => emp.id === updatedEmployeeProjects.id
-        );
-        let existEmp = employees[existEmpIdx];
-  
+      let existEmpIdx = employees.findIndex(
+        (emp) => emp.id === updatedEmployeeId
+      );
+
+      if (existEmpIdx !== -1) {
         updatedEmployees[existEmpIdx] = {
-          ...existEmp,
-          projects: updatedEmployeeProjects.projects,
+          ...employees[existEmpIdx],
+          projects: updatedProjects,
         };
-      });
 
-      cache.writeQuery({
-        query: GET_ALL_EMPLOYEES,
-        data: { employees: updatedEmployees },
-      });
+        cache.writeQuery({
+          query: GET_ALL_EMPLOYEES,
+          data: { employees: updatedEmployees },
+        });
+      }
     },
     // Run a given method on complete
     onCompleted: onComplete,
@@ -182,13 +186,16 @@ export const useAddProjectToEmployees = () => {
       let variablesArr: {}[] = [];
 
       // Get all the employees that includes the project inside their project list
-      let employeesIncludesTheProject = data.employees.filter(emp => emp.projects?.some(emp => emp.id === project.id));
+      let employeesIncludesTheProject = data.employees.filter((emp) =>
+        emp.projects?.some((emp) => emp.id === project.id)
+      );
 
       // Remove the Project from Employee hold him and now they not need too
       employeesIncludesTheProject.forEach((emp) => {
         if (!employees.find((e) => e.id === emp.id)) {
           let empProjects =
-            emp.projects?.filter((proj) => proj.id !== project.id)
+            emp.projects
+              ?.filter((proj) => proj.id !== project.id)
               .map((proj) => {
                 return {
                   id: proj.id,

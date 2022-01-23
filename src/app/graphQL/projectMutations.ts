@@ -137,25 +137,25 @@ export const useUpdateProjectsEmployees = (onComplete?: () => void) => {
         query: GET_ALL_PROJECTS,
       });
       const projects = cachedData?.projects || [];
-      const updatedProjectEmployees = data.data.updateProjectEmployees;
+      const updatedProjectId = data.data.updateProjectEmployees.id;
+      const updatedEmployees = data.data.updateProjectEmployees.employees;
       const updatedProjects = [...projects];
 
-      updatedProjectEmployees.forEach((proj: Project) => {
-        let existProjIdx = projects.findIndex(
-          (proj) => proj.id === updatedProjectEmployees.id
-        );
-        let existProj = projects[existProjIdx];
+      let existProjIdx = projects.findIndex(
+        (proj) => proj.id === updatedProjectId
+      );
 
+      if (existProjIdx !== -1) {
         updatedProjects[existProjIdx] = {
-          ...existProj,
-          employees: updatedProjectEmployees.employees,
+          ...projects[existProjIdx],
+          employees: updatedEmployees,
         };
-      });
 
-      cache.writeQuery({
-        query: GET_ALL_PROJECTS,
-        data: { projects: updatedProjects },
-      });
+        cache.writeQuery({
+          query: GET_ALL_PROJECTS,
+          data: { projects: updatedProjects },
+        });
+      }
     },
     // Run a given method on complete
     onCompleted: onComplete,
@@ -174,7 +174,9 @@ export const useAddEmployeeToProjects = () => {
       let variablesArr: {}[] = [];
 
       // Get all the projects that includes the employee inside their employee list
-      let projectIncludesTheEmployee = data.projects.filter(proj => proj.employees?.some(emp => emp.id === employee.id));
+      let projectIncludesTheEmployee = data.projects.filter((proj) =>
+        proj.employees?.some((emp) => emp.id === employee.id)
+      );
 
       // Remove the Employee from Projects hold him and now they not need too
       projectIncludesTheEmployee.forEach((proj) => {
