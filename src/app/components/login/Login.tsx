@@ -2,7 +2,7 @@ import { useContext, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import AuthContext from "../../store/auth/AuthContext";
 import { useGetEmployeeByEmail } from "../../graphQL/employeeQueries";
-import { UserInfo } from "../../types/types";
+
 import {
   Avatar,
   Box,

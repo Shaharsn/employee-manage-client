@@ -145,6 +145,8 @@ export const useUpdateEmployeesProjects = (onComplete?: () => void) => {
       const employees = cachedData?.employees || [];
       const updatedEmployeeProjects = data.data.updateEmployeeProjects;
       const updatedEmployees = [...employees];
+      console.log(updatedEmployeeProjects);
+      console.log(updatedEmployees);
 
       updatedEmployeeProjects.forEach((emp: Employee) => {
         let existEmpIdx = employees.findIndex(
@@ -154,7 +156,7 @@ export const useUpdateEmployeesProjects = (onComplete?: () => void) => {
   
         updatedEmployees[existEmpIdx] = {
           ...existEmp,
-          projects: updatedEmployeeProjects.employees,
+          projects: updatedEmployeeProjects.projects,
         };
       });
 
