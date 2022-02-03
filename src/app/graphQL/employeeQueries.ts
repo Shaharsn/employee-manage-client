@@ -5,9 +5,6 @@ import { PROJECT_DETAIL_FIELDS } from "./fragments";
 
 // GraphQL Queries
 export const GET_ALL_EMPLOYEES = gql`
-  ${EMPLOYEE_DETAIL_FIELDS}
-  ${PROJECT_DETAIL_FIELDS}
-
   query Employees {
     employees {
       ...EmployeeDetailFields
@@ -16,6 +13,10 @@ export const GET_ALL_EMPLOYEES = gql`
       }
     }
   }
+
+  
+  ${EMPLOYEE_DETAIL_FIELDS}
+  ${PROJECT_DETAIL_FIELDS}
 `;
 
 export const GET_EMPLOYEE_BY_ID = gql`
@@ -39,7 +40,7 @@ export const GET_EMPLOYEE_BY_EMAIL = gql`
       ...EmployeeDetailFields
     }
   }
-  
+
   ${EMPLOYEE_DETAIL_FIELDS}
 `;
 
