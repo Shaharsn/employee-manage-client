@@ -1,18 +1,18 @@
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import { Employee } from "../types/types";
- 
+import { EMPLOYEE_DETAIL_FIELDS } from "./fragments";
+import { PROJECT_DETAIL_FIELDS } from "./fragments";
+
 // GraphQL Queries
 export const GET_ALL_EMPLOYEES = gql`
+  ${EMPLOYEE_DETAIL_FIELDS}
+  ${PROJECT_DETAIL_FIELDS}
+
   query Employees {
     employees {
-      id
-      name
-      email
-      role
+      ...EmployeeDetailFields
       projects {
-        id
-        name
-        description
+        ...ProjectDetailFields
       }
     }
   }
@@ -21,28 +21,26 @@ export const GET_ALL_EMPLOYEES = gql`
 export const GET_EMPLOYEE_BY_ID = gql`
   query EmployeeById($employeeById: String!) {
     employeeById(id: $employeeById) {
-      id
-      name
-      email
-      role
+      ...EmployeeDetailFields
+
       projects {
-        id
-        name
-        description
+        ...ProjectDetailFields
       }
     }
   }
+  
+  ${EMPLOYEE_DETAIL_FIELDS}
+  ${PROJECT_DETAIL_FIELDS}
 `;
 
 export const GET_EMPLOYEE_BY_EMAIL = gql`
   query EmployeeByEmail($email: String!) {
     employeeByEmail(email: $email) {
-      id
-      name
-      email
-      role
+      ...EmployeeDetailFields
     }
   }
+  
+  ${EMPLOYEE_DETAIL_FIELDS}
 `;
 
 //Interfaces
@@ -68,9 +66,12 @@ export const useGetAllEmployees = () => {
 };
 
 export const useGetEmployeeById = (employeeById: String) => {
-  return useQuery<IEmployeeByEmailResponse, IEmployeeByIdInput>(GET_EMPLOYEE_BY_ID, {
-    variables: { employeeById },
-  });
+  return useQuery<IEmployeeByEmailResponse, IEmployeeByIdInput>(
+    GET_EMPLOYEE_BY_ID,
+    {
+      variables: { employeeById },
+    }
+  );
 };
 
 export const useGetEmployeeByEmail = (email: String) => {
