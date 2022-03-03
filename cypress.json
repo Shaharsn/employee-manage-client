@@ -1,0 +1,10 @@
+{
+    "baseUrl": "http://localhost:3000/",
+    "viewportHeight": 720,
+    "viewportWidth": 1280,
+
+    "env": {
+      "gqlUrl": "http://localhost:5000/employesss-managment/us-central1/graphql"
+    }
+  }
+  
