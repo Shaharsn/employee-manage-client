@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
-interface IDeleteModalProps {
+export interface IDeleteModalProps {
   type: string;
   name: string
   confirmMethod: () => void;
